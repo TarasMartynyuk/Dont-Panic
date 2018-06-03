@@ -4,9 +4,6 @@
 #include <algorithm>
 #include <cassert>
 #include <unordered_map>
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
 using namespace std;
 //region defs
 
@@ -16,8 +13,8 @@ void block();
 enum Direction { Left, Right };
 Direction parseDirection(const string&);
 Direction positionDirection(int, int);
-
 //endregion
+
 // semantically these are constants, hence the name
 //region vars
 
@@ -46,26 +43,32 @@ struct Clone {
         return floor == kExitFloor;
     }
 
+    bool isStandingOnExit() {
+        assert(isOnExitFloor());
+        return position == kExitPos;
+    }
+
     bool isFacingExit() {
         return direction == positionDirection(position, kExitPos);
     }
 
     bool isFacingElevator() {
-        int elevator_pos = elevators_positions.at(floor);
-        return direction == positionDirection(position, elevator_pos);
+        return direction == positionDirection(position, elevators_positions.at(floor));
+    }
+
+    bool isStandingOnElevator() {
+        return position == elevators_positions.at(floor);
     }
 };
 
-void readClone(Clone& clone) {
+void updateCloneFromInput(Clone& clone) {
     string direction; // direction of the leading clone: LEFT or RIGHT
     cin >> clone.floor >> clone.position >> direction;
     cin.ignore();
 
     clone.direction = parseDirection(direction);
 }
-
 //endregion
-
 
 int main()
 {
@@ -83,7 +86,7 @@ int main()
 
     Clone leading_clone(elevators_positions);
     while (true) {
-        readClone(leading_clone);
+        updateCloneFromInput(leading_clone);
 
         if(leading_clone.floor < 0) {
             wait();
@@ -99,7 +102,7 @@ int main()
             continue;
         }
 
-        if(leading_clone.isFacingElevator()) {
+        if(leading_clone.isFacingElevator() || leading_clone.isStandingOnElevator()) {
             wait();
         } else {
             block();
@@ -109,7 +112,7 @@ int main()
 
 
 Direction positionDirection(int clone_pos, int position) {
-    assert(clone_pos != position);
+//    assert(clone_pos != position);
     return position > clone_pos ?
            Direction::Right : Direction::Left;
 }
@@ -126,7 +129,3 @@ void wait() {
 void block() {
     cout << "BLOCK" << endl;
 }
-
-
-
-#pragma clang diagnostic pop
