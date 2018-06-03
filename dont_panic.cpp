@@ -37,7 +37,10 @@ struct Clone {
     int position;
     Direction direction;
     // will outlive us for sure
-    unordered_map<int, int>& elevators_positions;
+    const unordered_map<int, int>& elevators_positions;
+
+    Clone(const unordered_map<int, int>& elevators_positions)
+        : elevators_positions(elevators_positions) {}
 
     bool isOnExitFloor() {
         return floor == kExitFloor;
@@ -48,7 +51,7 @@ struct Clone {
     }
 
     bool isFacingElevator() {
-        int elevator_pos = elevators_positions[floor];
+        int elevator_pos = elevators_positions.at(floor);
         return direction == positionDirection(position, elevator_pos);
     }
 };
@@ -75,11 +78,10 @@ int main()
         int elevator_pos; // position of the elevator on its floor
         cin >> elevator_floor >> elevator_pos; cin.ignore();
 
-        elevators_positions.insert(elevator_floor, elevator_pos);
+        elevators_positions.insert(make_pair(elevator_floor, elevator_pos));
     }
 
-    Clone leading_clone{};
-    leading_clone.elevators_positions = elevators_positions;
+    Clone leading_clone(elevators_positions);
     while (true) {
         readClone(leading_clone);
 
